@@ -29,6 +29,8 @@ PHP, MySQL, HTML5/CSS3, JavaScript (AJAX), Amazon Payment Services (APS)
 
 Use these credentials for payment:
 
-CARD NUMBER         EXPIRY DATE      CVC
+CARD NUMBER:    4005550000000001	  
 
-4005550000000001	  05/25	           123
+EXPIRY DATE:    05/25	           
+
+CVC:            123
