@@ -1,21 +1,21 @@
 <?php
 require_once 'includes/session_config.php';
 
-// Redirect to home if not logged in or cart is empty
+
 if (!isset($_SESSION['user_id']) || empty($_SESSION['cart'])) {
     header("Location: index.php");
     exit;
 }
 
-// === APS Credentials ===
+
 $access_code = "IFafg4g3ZkDD5SigYlpl";
 $merchant_identifier = "pCNttJRP";
 $sha_request_phrase = "12QN0MFnhxftV7Rev1l2nY[!";
 $currency = "BHD";
 $language = "en";
-$return_url = "http://localhost:8080/response.php?session_id=" . session_id(); // update with your actual return handler
+$return_url = "http://localhost:8080/response.php?session_id=" . session_id(); 
 
-// === Use the session cart total (in BHD) ===
+
 $cart_total_bhd = $_SESSION['cart_total_bhd'];
 $amount = $cart_total_bhd * 1000; // Convert to fils
 $order_id = uniqid("BPZ_");
@@ -44,7 +44,7 @@ $signature_string .= $sha_request_phrase;
 
 $signature = hash("sha256", $signature_string);
 
-// === Auto-redirect to APS Checkout ===
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -60,7 +60,7 @@ $signature = hash("sha256", $signature_string);
     </form>
 
     <script>
-        // Auto-submit the form
+    
         document.getElementById('paymentForm').submit();
     </script>
 </body>
