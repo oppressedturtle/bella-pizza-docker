@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bella_web
+    ports:
+      - "8080:80"
+      - "443:443"
+    volumes:
+      - ./certs/selfsigned.crt:/etc/apache2/ssl/selfsigned.crt:ro
+      - ./certs/selfsigned.key:/etc/apache2/ssl/selfsigned.key:ro
+      - ./default-ssl.conf:/etc/apache2/sites-available/default-ssl.conf:ro
+      - ./app:/var/www/html
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - bella_net
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: rootpass
+      MYSQL_DATABASE: RestaurantDB
+
+  db:
+    image: mysql:8.0
+    container_name: bella_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: restaurantdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - bella_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: bella_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpass
+    depends_on:
+      - db
+    networks:
+      - bella_net
+
+volumes:
+  dbdata:
+
+networks:
+  bella_net:
