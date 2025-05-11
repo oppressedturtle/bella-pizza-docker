@@ -18,6 +18,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 $sql = "SELECT * FROM `order` WHERE customer_id = :customer_id ORDER BY order_date DESC";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute([':customer_id' => $user_id]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -206,7 +207,11 @@ if (!empty($search)) {
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-        }
+            display: block;
+            width: 100%;
+            margin-bottom: 8px; /* ✅ add this */
+}
+
 
         .view-button button:hover {
             background-color: #a71d2a;
@@ -273,12 +278,24 @@ if (!empty($search)) {
                     </td>
                     <td><?= number_format($order['total_amount'], 2) ?> BD</td>
                     <td class="view-button">
-                    <form method="GET" action="order_details_user.php" style="margin: 0;">
-                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                        <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                        <button type="submit">View Details</button>
-                    </form>
-                    </td>
+    <div>
+        <form method="GET" action="order_details_user.php" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+            <button type="submit">View Details</button>
+        </form>
+    </div>
+<?php if ($order['status'] === 'Out for Delivery' && !empty($order['delivery_driver_id'])): ?>
+    <form method="GET" action="track_delivery.php" style="margin: 0;">
+        <input type="hidden" name="order_id" value="<?= (int)$order['order_id'] ?>">
+        <input type="hidden" name="driver_id" value="<?= (int)$order['delivery_driver_id'] ?>">
+        <button type="submit">Track Delivery</button>
+    </form>
+<?php endif; ?>
+
+</td>
+
+
                 </tr>
             <?php endforeach; ?>
         </table>

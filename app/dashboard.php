@@ -1,16 +1,11 @@
 <?php
-
 require __DIR__ . '/includes/session_config.php';
-
 require __DIR__ . '/includes/csrf.php';
-
 
 if (!isset($_SESSION["employee_id"])) {
     header("Location: login.php");
     exit();
 }
-
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
     validate_csrf_token();
@@ -134,9 +129,7 @@ $role = $_SESSION["role"] ?? '';
         <div class="header">
             <h2><?= ucfirst($role) ?> Dashboard</h2>
             <form method="POST" class="logout-form">
-                
-                <input type="hidden" name="csrf_token"
-                       value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 <button type="submit" name="logout">Logout</button>
             </form>
         </div>
@@ -157,6 +150,9 @@ $role = $_SESSION["role"] ?? '';
                 <a href="orders.php" class="action-button">📦 Manage Orders</a>
             <?php elseif (in_array($role, ['cashier', 'chef', 'delivery'])): ?>
                 <a href="orders.php" class="action-button">📦 View Orders</a>
+                <?php if ($role === 'delivery'): ?>
+                    <a href="driver_share_location.php" class="action-button">📍 Share Location</a>
+                <?php endif; ?>
             <?php else: ?>
                 <p style="text-align:center;">No actions available for your role.</p>
             <?php endif; ?>
