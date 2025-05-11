@@ -31,7 +31,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: restaurantdb
+      MYSQL_DATABASE: RestaurantDB
       MYSQL_USER: user
       MYSQL_PASSWORD: userpass
     volumes:
