@@ -6,8 +6,12 @@ $conn = new mysqli("db", "root", "rootpass", "RestaurantDB");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 require_once "log_helper.php";
 
+
+
+// Redirect if already logged in
 if (isset($_SESSION["employee_id"])) {
     header("Location: dashboard.php");
     exit();
@@ -34,6 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
         if ($result->num_rows === 1) {
             $employee = $result->fetch_assoc();
             if (password_verify($password, $employee["password_hash"])) {
+                session_regenerate_id(true);
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 $_SESSION["employee_id"] = $employee["employee_id"];
                 $_SESSION["username"]    = $employee["username"];
                 $_SESSION["email"]       = $employee["email"];
@@ -56,6 +62,8 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             if ($result->num_rows === 1) {
                 $customer = $result->fetch_assoc();
                 if (password_verify($password, $customer["password_hash"])) {
+                    session_regenerate_id(true);
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     $_SESSION["user_id"]  = $customer["customer_id"];
                     $_SESSION["username"] = $customer["username"];
                     $_SESSION["email"]    = $customer["email"];
@@ -81,7 +89,6 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
         $number       = trim($_POST["reg_number"]);
         $address      = trim($_POST["reg_address"]);
 
-        // Input validation
         if (empty($username) || strlen($username) < 3) {
             $error = "Username must be at least 3 characters long.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -94,8 +101,6 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             $error = "Address must be at least 5 characters long.";
         } else {
             $password = password_hash($password_raw, PASSWORD_BCRYPT);
-
-            // Check for existing username/email
             $stmt = $conn->prepare("SELECT * FROM customer WHERE username = ? OR email = ?");
             $stmt->bind_param("ss", $username, $email);
             $stmt->execute();
@@ -104,7 +109,6 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             if ($result->num_rows == 0) {
                 $stmt = $conn->prepare("INSERT INTO customer (username, email, password_hash, phone, address) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("sssss", $username, $email, $password, $number, $address);
-
                 if ($stmt->execute()) {
                     log_action("Registration Success", "New customer registered", "INFO", null, $conn->insert_id, $username);
                     $success = "Registration successful. You can now log in.";
