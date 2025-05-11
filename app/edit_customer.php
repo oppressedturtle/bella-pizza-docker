@@ -15,15 +15,13 @@ if (!isset($_SESSION["employee_id"]) || !in_array($_SESSION["role"], ['admin', '
     exit();
 }
 
-// Validate customer_id
+
 if (!isset($_GET['customer_id'])) {
     die("Customer ID not specified.");
 }
 
 $customer_id = $_GET['customer_id'];
 $success = $error = "";
-
-// Fetch customer data
 $stmt = $pdo->prepare("SELECT * FROM customer WHERE customer_id = ?");
 $stmt->execute([$customer_id]);
 $customer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,7 +30,7 @@ if (!$customer) {
     die("Customer not found.");
 }
 
-// Handle form submission
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_customer"])) {
     $username = $_POST["username"];
     $email = $_POST["email"];
@@ -42,19 +40,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_customer"])) {
 
     if (!empty($username) && !empty($email)) {
         if (!empty($new_password)) {
-            // Update with new password
+          
             $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("UPDATE customer SET username = ?, email = ?, phone = ?, address = ?, password_hash = ? WHERE customer_id = ?");
             $stmt->execute([$username, $email, $phone, $address, $password_hash, $customer_id]);
         } else {
-            // Update without changing password
+          
             $stmt = $pdo->prepare("UPDATE customer SET username = ?, email = ?, phone = ?, address = ? WHERE customer_id = ?");
             $stmt->execute([$username, $email, $phone, $address, $customer_id]);
         }
 
         $success = "Customer updated successfully.";
 
-        // Refresh data
+      
         $stmt = $pdo->prepare("SELECT * FROM customer WHERE customer_id = ?");
         $stmt->execute([$customer_id]);
         $customer = $stmt->fetch(PDO::FETCH_ASSOC);

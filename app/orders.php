@@ -99,7 +99,7 @@ function renderSections($today_orders, $past_orders, $role) {
     renderSection("📂 Past Orders", $past_orders, $role);
 }
 
-// Handle status change (AJAX)
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['new_status'])) {
     validate_csrf_token();
     $order_id = $_POST['order_id'];

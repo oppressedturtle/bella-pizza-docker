@@ -1,15 +1,25 @@
 <?php
 require __DIR__ . '/includes/session_config.php';
 require __DIR__ . '/includes/csrf.php';
-
+include 'includes/chatbot.php'; 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit();
 }
-
+$customerId = $_SESSION["user_id"];
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+
+$stmt = $pdo->prepare("INSERT INTO customer_logins (customer_id) VALUES (?)");
+$stmt->execute([$customerId]);
+
+
+$checkStmt = $pdo->prepare("SELECT COUNT(*) FROM customer_logins WHERE customer_id = ?");
+$checkStmt->execute([$customerId]);
+$loginCount = $checkStmt->fetchColumn();
+
+$isFirstLogin = ($loginCount == 1);
 
 $stmt = $pdo->prepare("SELECT username FROM customer WHERE customer_id = ?");
 $stmt->execute([$_SESSION["user_id"]]);
