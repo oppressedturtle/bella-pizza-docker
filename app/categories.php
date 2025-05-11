@@ -19,14 +19,13 @@ if (!isset($_SESSION["employee_id"]) || !in_array($_SESSION["role"], ['admin', '
 
 $message = '';
 
-// Delete if requested
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM category WHERE category_id = ?");
     $stmt->execute([$_GET['delete']]);
     $message = "Category deleted successfully!";
 }
 
-// Fetch all categories
 $categories = $pdo
     ->query("SELECT * FROM category ORDER BY category_id DESC")
     ->fetchAll(PDO::FETCH_ASSOC);

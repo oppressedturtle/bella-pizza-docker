@@ -11,6 +11,7 @@ if (!isset($_SESSION["employee_id"])) {
 }
 
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
     validate_csrf_token();
     session_unset();

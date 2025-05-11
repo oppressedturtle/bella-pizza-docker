@@ -10,6 +10,9 @@ if (!isset($_SESSION["employee_id"]) || $_SESSION["role"] !== 'admin') {
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+
+
+
 $startDate = $_GET['start'] ?? date('Y-m-01');
 $endDate   = $_GET['end'] ?? date('Y-m-d');
 
@@ -17,17 +20,18 @@ $params = [':start' => $startDate, ':end' => $endDate];
 $condition = "WHERE DATE(order_date) BETWEEN :start AND :end";
 $nonCancelledCondition = $condition . " AND status != 'cancelled'";
 
-// Total orders
+
+
 $totalOrders = $pdo->prepare("SELECT COUNT(*) FROM `order` $condition");
 $totalOrders->execute($params);
 $totalOrders = $totalOrders->fetchColumn();
 
-// Total revenue (excluding cancelled)
+
 $totalRevenue = $pdo->prepare("SELECT SUM(total_amount) FROM `order` $nonCancelledCondition");
 $totalRevenue->execute($params);
 $totalRevenue = $totalRevenue->fetchColumn() ?: 0;
 
-// Order statuses breakdown
+
 $orderStatuses = $pdo->prepare("
   SELECT status, COUNT(*) AS c, SUM(total_amount) AS total
   FROM `order`
@@ -37,7 +41,7 @@ $orderStatuses = $pdo->prepare("
 $orderStatuses->execute($params);
 $orderStatuses = $orderStatuses->fetchAll(PDO::FETCH_ASSOC);
 
-// Menu items sold
+
 $allItems = $pdo->prepare("
   SELECT m.item_name, SUM(oi.quantity) AS total_sold, SUM(oi.quantity * m.price) AS total_amount
   FROM order_items oi
@@ -50,7 +54,7 @@ $allItems = $pdo->prepare("
 $allItems->execute($params);
 $allItems = $allItems->fetchAll(PDO::FETCH_ASSOC);
 
-// Daily revenue
+
 $dailyRevenue = $pdo->prepare("
   SELECT DATE(order_date) AS day, SUM(total_amount) AS revenue
   FROM `order`
@@ -65,11 +69,45 @@ foreach ($dailyRevenue as $row) {
   $dailyValues[] = round($row['revenue'], 2);
 }
 
-// Chart data
+
 $statusLabels = array_column($orderStatuses, 'status');
 $statusCounts = array_column($orderStatuses, 'c');
 $itemLabels   = array_column($allItems, 'item_name');
 $itemCounts   = array_column($allItems, 'total_sold');
+
+
+$loginQuery = $pdo->prepare("
+  SELECT COUNT(*) FROM customer_logins
+  WHERE DATE(login_time) BETWEEN :start AND :end
+");
+$loginQuery->execute($params);
+$totalCustomerLogins = $loginQuery->fetchColumn();
+
+
+$newCustomersQuery = $pdo->prepare("
+  SELECT COUNT(*) FROM (
+    SELECT customer_id, MIN(login_time) AS first_login
+    FROM customer_logins
+    GROUP BY customer_id
+    HAVING DATE(first_login) BETWEEN :start AND :end
+  ) AS new_customers
+");
+$newCustomersQuery->execute($params);
+$newCustomers = $newCustomersQuery->fetchColumn();
+
+
+$returningCustomersQuery = $pdo->prepare("
+  SELECT COUNT(DISTINCT current.customer_id) FROM customer_logins current
+  JOIN (
+    SELECT customer_id
+    FROM customer_logins
+    WHERE DATE(login_time) < :start
+  ) AS previous ON current.customer_id = previous.customer_id
+  WHERE DATE(current.login_time) BETWEEN :start AND :end
+");
+$returningCustomersQuery->execute($params);
+$returningCustomers = $returningCustomersQuery->fetchColumn();
+
 ?>
 
 <!DOCTYPE html>
@@ -240,6 +278,22 @@ $itemCounts   = array_column($allItems, 'total_sold');
 </div>
 
 <div class="cards">
+<div class="card">
+  <h3>Total Unique Visits</h3>
+  <p><?= $newCustomers ?></p>
+</div>
+<div class="card">
+  <h3>Total Customer Logins</h3>
+  <p><?= $totalCustomerLogins ?></p>
+</div>
+<div class="card">
+  <h3>New Customers</h3>
+  <p><?= $newCustomers ?></p>
+</div>
+<div class="card">
+  <h3>Returning Customers</h3>
+  <p><?= $returningCustomers ?></p>
+</div>
   <div class="card">
     <h3>Total Orders</h3>
     <p><?= $totalOrders ?></p>
@@ -282,6 +336,42 @@ $itemCounts   = array_column($allItems, 'total_sold');
   </div>
   <canvas id="revenueChart" width="1000" height="400"></canvas>
 </div>
+<?php
+$csvRows = [
+  ['Bella Pizza Analytics Report'],
+  ['Date Range:', "$startDate to $endDate"],
+  ['Generated At:', date("Y-m-d H:i:s")],
+  [],
+  ['Total Orders', $totalOrders],
+  ['Total Revenue', number_format($totalRevenue, 2) . ' BD'],
+  ['Total Visits', $totalVisits],
+  ['Total Unique Visits', $totalUniqueVisits],
+  ['Total Customer Logins', $totalCustomerLogins],
+  ['New Customers', $newCustomers],
+  ['Returning Customers', $returningCustomers],
+  [],
+  ['Status', 'Count', 'Total Amount']
+];
+
+foreach ($orderStatuses as $s) {
+  $csvRows[] = [
+    $s['status'],
+    $s['c'],
+    number_format($s['total'], 2) . ' BD'
+  ];
+}
+
+$csvRows[] = [];
+$csvRows[] = ['Item Name', 'Total Sold', 'Total Amount'];
+
+foreach ($allItems as $i) {
+  $csvRows[] = [
+    $i['item_name'],
+    $i['total_sold'],
+    number_format($i['total_amount'], 2) . ' BD'
+  ];
+}
+?>
 
 <script>
   Chart.defaults.font.family = 'Fredoka, sans-serif';
@@ -324,25 +414,9 @@ $itemCounts   = array_column($allItems, 'total_sold');
   });
 
   function downloadCSV() {
-    const rows = [
-      ['Bella Pizza Analytics Report'],
-      ['Date Range:', '<?= $startDate ?> to <?= $endDate ?>'],
-      ['Generated At:', new Date().toLocaleString()],
-      [],
-      ['Total Orders', '<?= $totalOrders ?>'],
-      ['Total Revenue', '<?= number_format($totalRevenue, 2) ?> BD'],
-      [],
-      ['Status', 'Count', 'Total Amount'],
-<?php foreach ($orderStatuses as $s): ?>
-      ['<?= $s['status'] ?>', '<?= $s['c'] ?>', '<?= number_format($s['total'], 2) ?> BD'],
-<?php endforeach; ?>
-      [],
-      ['Item Name', 'Total Sold', 'Total Amount'],
-<?php foreach ($allItems as $i): ?>
-      ['<?= $i['item_name'] ?>', '<?= $i['total_sold'] ?>', '<?= number_format($i['total_amount'], 2) ?> BD'],
-<?php endforeach; ?>
-    ];
+    const rows = <?= json_encode($csvRows) ?>;
     const csv = rows.map(r => r.join(",")).join("\n");
+
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -350,6 +424,9 @@ $itemCounts   = array_column($allItems, 'total_sold');
     link.click();
   }
 </script>
+
+
+
 
 </body>
 </html>

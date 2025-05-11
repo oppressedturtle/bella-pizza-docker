@@ -5,7 +5,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Load categories
 $category_sql = "SELECT * FROM category ORDER BY display_order ASC, name ASC";
 $category_result = $conn->query($category_sql);
 $categories = [];
@@ -13,10 +12,10 @@ while ($row = $category_result->fetch_assoc()) {
     $categories[] = $row;
 }
 
-// Group menu items by category_id
 $menu_items_by_category = [];
 $menu_sql = "SELECT m.*, c.name AS category_name FROM menu m
              LEFT JOIN category c ON m.category_id = c.category_id
+             WHERE m.availability = 1
              ORDER BY m.display_order ASC";
 $menu_result = $conn->query($menu_sql);
 while ($row = $menu_result->fetch_assoc()) {
@@ -27,171 +26,183 @@ while ($row = $menu_result->fetch_assoc()) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Menu | Bella Pizza</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #dc3545;
-      --accent: #f8c102;
-      --bg: #fff8f3;
-      --light: #fff;
+        --primary: #dc3545;
+        --accent: #f8c102;
+        --light: #fff;
+        --dark: #2d2d2d;
+        --bg: #fff8f3;
     }
     * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
     body {
-      font-family: 'Fredoka', sans-serif;
-      background: var(--bg);
-      color: #333;
-      padding: 30px 20px;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background: var(--light);
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: var(--primary);
-    }
-    .nav {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    .nav a {
-      background-color: var(--primary);
-      color: white;
-      text-decoration: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      margin: 0 10px;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .nav a:hover {
-      background-color: #a71d2a;
-    }
-    .category {
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-    }
-    .category-header {
-      padding: 16px 20px;
-      background: #fef2f2;
-      font-weight: bold;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .category-items {
-      display: none;
-      padding: 10px 20px 20px;
-    }
-    .menu-item {
-      display: flex;
-      gap: 20px;
-      padding: 16px 0;
-      border-bottom: 1px solid #eee;
-      align-items: center;
-    }
-    .menu-item:last-child {
-      border-bottom: none;
-    }
-    .menu-item img {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-    .menu-details {
-      flex: 1;
-    }
-    .menu-details h3 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: var(--primary);
-    }
-    .menu-details p {
-      margin: 4px 0;
-      font-size: 15px;
-      color: #555;
-    }
-    .no-image {
-      width: 120px;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-style: italic;
-      color: #aaa;
-      background: #f5f5f5;
-      border-radius: 10px;
-    }
-    @media (max-width: 700px) {
-      .menu-item {
+        font-family: 'Fredoka', sans-serif;
+        background: var(--bg);
+        color: var(--dark);
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-      }
-      .menu-item img, .no-image {
+        min-height: 100vh;
+    }
+    .header {
+        background: var(--primary);
+        color: var(--light);
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .logo {
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+    .logo span {
+        color: var(--accent);
+    }
+    nav .home-btn {
+        background: var(--accent);
+        color: var(--dark);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: background 0.2s ease;
+    }
+    nav .home-btn:hover {
+        background: #ffd43b;
+    }
+    .hero {
+        background: url('img/banner.jpg') center/cover no-repeat;
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: yellow;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    main {
+        flex: 1;
+        padding: 30px 20px;
+        max-width: 1200px;
+        margin: auto;
+    }
+    section.category {
+        margin-top: 40px;
+    }
+    section.category h2 {
+        border-left: 10px solid var(--accent);
+        padding-left: 10px;
+        margin-bottom: 18px;
+        font-size: 1.5rem;
+    }
+    .cards {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 10px;
+        padding-left: 5px;
+        scroll-padding: 10px;
+    }
+    .card {
+        flex: 0 0 auto;
+        min-width: 230px;
+        max-width: 260px;
+        background: var(--light);
+        border-radius: 12px;
+        box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+        display: flex;
+        flex-direction: column;
+        scroll-snap-align: start;
+        transition: transform 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card img {
         width: 100%;
-        height: auto;
-      }
+        height: 160px;
+        object-fit: cover;
+        background: #ffc;
+    }
+    .card-content {
+        padding: 15px;
+        flex: 1;
+    }
+    .card-content h3 {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+    }
+    .card-content p.desc {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        color: #555;
+    }
+    .card-content .price {
+        font-weight: bold;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+    @media (max-width: 600px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+        .header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+        nav {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="nav">
-    <a href="index.php">🏠 Home</a>
-    <a href="login.php">🔐 Login</a>
-  </div>
+<header class="header">
+  <div class="logo">Bella <span>Pizza</span> </div>
+  <nav>
+    <a href="index.php" class="home-btn">← Home</a>
+  </nav>
+</header>
 
-  <h1>Our Menu</h1>
+<div class="hero">Our Fresh Menu</div>
 
-  <?php foreach ($categories as $cat): ?>
-    <?php if (!empty($menu_items_by_category[$cat['category_id']])): ?>
-      <div class="category">
-        <div class="category-header"><?= htmlspecialchars($cat['name']) ?></div>
-        <div class="category-items">
-          <?php foreach ($menu_items_by_category[$cat['category_id']] as $item): ?>
-            <div class="menu-item">
-              <?php if (!empty($item['image_path'])): ?>
-                <img src="img/<?= htmlspecialchars($item['image_path']) ?>" alt="Item Image">
-              <?php else: ?>
-                <div class="no-image">No image</div>
-              <?php endif; ?>
-              <div class="menu-details">
-                <h3><?= htmlspecialchars($item['item_name']) ?></h3>
-                <p><?= htmlspecialchars($item['description']) ?></p>
-                <p><strong>Price:</strong> <?= number_format($item['price'], 2) ?> BD</p>
-              </div>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    <?php endif; ?>
-  <?php endforeach; ?>
-</div>
-
-<script>
-  document.querySelectorAll('.category-header').forEach(header => {
-    header.addEventListener('click', () => {
-      const items = header.nextElementSibling;
-      items.style.display = items.style.display === 'block' ? 'none' : 'block';
-    });
-  });
-</script>
+<main>
+    <?php foreach ($categories as $cat): ?>
+        <?php if (!empty($menu_items_by_category[$cat['category_id']])): ?>
+            <section class="category">
+                <h2><?= htmlspecialchars($cat['name']) ?></h2>
+                <div class="cards">
+                    <?php foreach ($menu_items_by_category[$cat['category_id']] as $item): ?>
+                        <div class="card">
+                            <img src="img/<?= htmlspecialchars($item['image_path'] ?: 'placeholder.png') ?>" alt="">
+                            <div class="card-content">
+                                <h3><?= htmlspecialchars($item['item_name']) ?></h3>
+                                <p class="desc"><?= htmlspecialchars($item['description'] ?: 'No description.') ?></p>
+                                <div class="price"><?= number_format($item['price'], 2) ?> BD</div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+    <?php endforeach; ?>
+</main>
 
 </body>
 </html>

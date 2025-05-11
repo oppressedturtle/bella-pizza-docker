@@ -12,19 +12,25 @@ if (isset($_SESSION["employee_id"])) {
     header("Location: dashboard.php");
     exit();
 }
+
 if (isset($_SESSION["user_id"])) {
     header("Location: dashboard_user.php");
     exit();
 }
+
 if ($_SERVER["REQUEST_METHOD"] === 'POST') {
     validate_csrf_token();
 
     if (isset($_POST["login"])) {
-        $username = $conn->real_escape_string($_POST["username"]);
+        $username = trim($_POST["username"]);
         $password = $_POST["password"];
-      
-        $query = "SELECT * FROM employee WHERE username='$username'";
-        $result = $conn->query($query);
+
+        // Check employee first
+        $stmt = $conn->prepare("SELECT * FROM employee WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
         if ($result->num_rows === 1) {
             $employee = $result->fetch_assoc();
             if (password_verify($password, $employee["password_hash"])) {
@@ -41,9 +47,12 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
                 $error = "Invalid password.";
             }
         } else {
-            
-            $query  = "SELECT * FROM customer WHERE username='$username'";
-            $result = $conn->query($query);
+            // Check customer next
+            $stmt = $conn->prepare("SELECT * FROM customer WHERE username = ?");
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
             if ($result->num_rows === 1) {
                 $customer = $result->fetch_assoc();
                 if (password_verify($password, $customer["password_hash"])) {
@@ -66,13 +75,13 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
     }
 
     if (isset($_POST["register"])) {
-        $username     = trim($conn->real_escape_string($_POST["reg_username"]));
+        $username     = trim($_POST["reg_username"]);
         $password_raw = trim($_POST["reg_password"]);
-        $email        = trim($conn->real_escape_string($_POST["reg_email"]));
-        $number       = trim($conn->real_escape_string($_POST["reg_number"]));
-        $address      = trim($conn->real_escape_string($_POST["reg_address"]));
+        $email        = trim($_POST["reg_email"]);
+        $number       = trim($_POST["reg_number"]);
+        $address      = trim($_POST["reg_address"]);
 
-      
+        // Input validation
         if (empty($username) || strlen($username) < 3) {
             $error = "Username must be at least 3 characters long.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -84,14 +93,19 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
         } elseif (empty($address) || strlen($address) < 5) {
             $error = "Address must be at least 5 characters long.";
         } else {
-            $password   = password_hash($password_raw, PASSWORD_BCRYPT);
-            $checkUser  = "SELECT * FROM customer WHERE username='$username' OR email='$email'";
-            $result     = $conn->query($checkUser);
+            $password = password_hash($password_raw, PASSWORD_BCRYPT);
+
+            // Check for existing username/email
+            $stmt = $conn->prepare("SELECT * FROM customer WHERE username = ? OR email = ?");
+            $stmt->bind_param("ss", $username, $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
             if ($result->num_rows == 0) {
-                $query = "INSERT INTO customer
-                    (username, email, password_hash, phone, address)
-                    VALUES ('$username', '$email', '$password', '$number', '$address')";
-                if ($conn->query($query)) {
+                $stmt = $conn->prepare("INSERT INTO customer (username, email, password_hash, phone, address) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssss", $username, $email, $password, $number, $address);
+
+                if ($stmt->execute()) {
                     log_action("Registration Success", "New customer registered", "INFO", null, $conn->insert_id, $username);
                     $success = "Registration successful. You can now log in.";
                 } else {
@@ -106,6 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

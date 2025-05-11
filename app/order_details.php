@@ -18,7 +18,7 @@ if (!isset($_GET['order_id'])) {
 
 $order_id = $_GET['order_id'];
 
-// Get order info
+
 $order_stmt = $pdo->prepare("
     SELECT o.*, c.username AS customer_name, c.email, c.phone, c.address
     FROM `order` o
@@ -32,7 +32,7 @@ if (!$order) {
     die("Order not found.");
 }
 
-// Get order items
+
 $items_stmt = $pdo->prepare("
     SELECT oi.*, m.item_name, m.price
     FROM order_items oi

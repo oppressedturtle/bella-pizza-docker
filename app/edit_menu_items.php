@@ -260,15 +260,35 @@ $csrf_token = $_SESSION['csrf_token'];
 }
 
     }
+    .nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-btn {
+  background: var(--accent);
+  color: black;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #ddb400;
+}
+
   </style>
 </head>
 <body>
 <div class="navbar">
   <h1>Bella Pizza</h1>
-  <div>
-    <a href="dashboard.php">Dashboard</a>
-    <a href="logout.php">Logout</a>
-  </div>
+  <div class="nav-buttons">
+  <a href="dashboard.php" class="nav-btn">Dashboard</a>
+  <a href="logout.php" class="nav-btn">Logout</a>
+</div>
+
 </div>
 
 <div class="container">

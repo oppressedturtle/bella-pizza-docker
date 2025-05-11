@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: bella_web
     ports:
-      - "8080:80"
+      - "80:80"
       - "443:443"
     volumes:
       - ./certs/selfsigned.crt:/etc/apache2/ssl/selfsigned.crt:ro

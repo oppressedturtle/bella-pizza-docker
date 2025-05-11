@@ -29,14 +29,14 @@ if (!$order_id) {
     die("Order ID not provided.");
 }
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['driver_id'])) {
     $driver_id = $_POST['driver_id'];
     $stmt = $pdo->prepare("UPDATE `order` SET delivery_driver_id = :driver_id WHERE order_id = :order_id");
     if ($stmt->execute([':driver_id' => $driver_id, ':order_id' => $order_id])) {
         $success = "Driver assigned successfully.";
 
-        // Log the action
+   
         $driver = $pdo->prepare("SELECT first_name, last_name FROM employee WHERE employee_id = ?");
         $driver->execute([$driver_id]);
         $driver_data = $driver->fetch(PDO::FETCH_ASSOC);

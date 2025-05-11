@@ -2,12 +2,32 @@
 require __DIR__ . '/includes/session_config.php';
 require __DIR__ . '/includes/csrf.php';
 
+$host = "db";
+$dbname = "RestaurantDB";
+$username = "root";
+$password = "rootpass";
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Database error: " . $e->getMessage());
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
     validate_csrf_token();
     session_destroy();
     header("Location: login.php");
     exit();
+}
+
+$ip = $_SERVER['REMOTE_ADDR'];
+$userAgent = $_SERVER['HTTP_USER_AGENT'];
+
+if (!isset($_COOKIE['visitor_logged'])) {
+    $stmt = $pdo->prepare("INSERT IGNORE INTO visitors (ip_address, user_agent) VALUES (?, ?)");
+    $stmt->execute([$ip, $userAgent]);
+    setcookie('visitor_logged', '1', time() + (86400 * 30), "/");
 }
 ?>
 <!DOCTYPE html>
@@ -39,6 +59,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
       justify-content: center;
       align-items: center;
       padding: 20px;
+      flex-direction: column;
+    }
+
+    .logo {
+      margin-bottom: 20px;
+      max-width: 180px;
+    }
+
+    .logo img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .container {
@@ -102,6 +135,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
         padding: 25px 20px;
       }
 
+      .logo {
+        max-width: 140px;
+      }
+
       h1 {
         font-size: 2rem;
       }
@@ -120,6 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
 </head>
 <body>
 
+<div class="logo">
+  <img src="img/bella pizza logo.png" alt="Bella Pizza Logo">
+</div>
+
 <div class="container">
   <h1>Welcome to Bella Pizza</h1>
   <p>Delicious, handcrafted pizzas made with love — explore our menu and treat yourself today.</p>
@@ -129,8 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
       <a href="login.php">Login</a>
     <?php else: ?>
       <form method="POST">
-        <input type="hidden" name="csrf_token"
-               value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <button type="submit" name="logout">Logout</button>
       </form>
     <?php endif; ?>
