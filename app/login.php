@@ -9,9 +9,6 @@ if ($conn->connect_error) {
 
 require_once "log_helper.php";
 
-
-
-// Redirect if already logged in
 if (isset($_SESSION["employee_id"])) {
     header("Location: dashboard.php");
     exit();
@@ -29,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
         $username = trim($_POST["username"]);
         $password = $_POST["password"];
 
-        // Check employee first
         $stmt = $conn->prepare("SELECT * FROM employee WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -53,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
                 $error = "Invalid password.";
             }
         } else {
-            // Check customer next
             $stmt = $conn->prepare("SELECT * FROM customer WHERE username = ?");
             $stmt->bind_param("s", $username);
             $stmt->execute();
@@ -69,6 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
                     $_SESSION["email"]    = $customer["email"];
                     $_SESSION["phone"]    = $customer["phone"];
                     log_action("Login Success", "Customer logged in successfully", "INFO", null, $customer["customer_id"], $customer["username"]);
+                    $_SESSION['login_type'] = 'normal';
+                    $_SESSION['user_id'] = $customer["customer_id"];
+
                     header("Location: dashboard_user.php");
                     exit();
                 } else {
@@ -138,11 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             --light: #fff;
             --bg: #fff8f3;
         }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Fredoka', sans-serif;
             background: var(--bg);
@@ -165,123 +159,110 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             color: #222;
             margin-bottom: 20px;
         }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
+        label { display: block; margin-bottom: 6px; font-weight: 600; }
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%; padding: 10px; margin-bottom: 16px;
+            border-radius: 6px; border: 1px solid #ccc; font-size: 14px;
         }
-        input[type="text"],
-        input[type="password"],
-        input[type="email"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
+        input:focus { border-color: var(--primary); outline: none; }
         button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            background-color: var(--primary);
-            color: var(--light);
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background 0.2s ease;
+            width: 100%; padding: 12px;
+            border: none; border-radius: 6px;
+            background-color: var(--primary); color: var(--light);
+            font-weight: bold; font-size: 15px;
+            cursor: pointer; transition: background 0.2s ease;
         }
-        button:hover {
-            background-color: #a71d2a;
-        }
+        button:hover { background-color: #a71d2a; }
         .nav {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            position: absolute; top: 20px; left: 20px;
         }
         .nav button {
-            background: #222;
-            color: var(--light);
-            padding: 8px 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            background: #222; color: var(--light);
+            padding: 8px 14px; font-weight: bold;
+            border: none; border-radius: 6px; cursor: pointer;
         }
-        .form-section {
-            margin-bottom: 40px;
-        }
+        .form-section { margin-bottom: 40px; }
         .message {
-            text-align: center;
-            margin-bottom: 16px;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-weight: bold;
+            text-align: center; margin-bottom: 16px;
+            padding: 10px 14px; border-radius: 6px; font-weight: bold;
         }
         .message.error {
-            background: #ffe5e5;
-            color: #dc3545;
-            border: 1px solid #dc3545;
+            background: #ffe5e5; color: #dc3545; border: 1px solid #dc3545;
         }
         .message.success {
-            background: #e6f9e6;
-            color: #28a745;
-            border: 1px solid #28a745;
+            background: #e6f9e6; color: #28a745; border: 1px solid #28a745;
         }
         @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
+            .container { padding: 20px; }
         }
     </style>
 </head>
 <body>
 <div class="nav">
-<a href="index.php"><button>← Home</button></a>
+    <a href="index.php"><button>← Home</button></a>
 </div>
 
 <div class="container">
-<div class="form-section">
-    <h2>Login</h2>
-    <?php if (isset($error))   echo "<div class='message error'>$error</div>"; ?>
-    <?php if (isset($success)) echo "<div class='message success'>$success</div>"; ?>
-    <form method="POST">
-        
-        <input type="hidden" name="csrf_token"
-               value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-        <label>Username</label>
-        <input type="text" name="username" required>
-        <label>Password</label>
-        <input type="password" name="password" required>
-        <button type="submit" name="login">Login</button>
-    </form>
+    <div class="form-section">
+        <h2>Login</h2>
+        <?php if (isset($error)) echo "<div class='message error'>$error</div>"; ?>
+        <?php if (isset($success)) echo "<div class='message success'>$success</div>"; ?>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <label>Username</label>
+            <input type="text" name="username" required>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <button type="submit" name="login">Login</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 10px;">
+            <button type="button" onclick="signInWithGoogle()" style="background: white; border: 1px solid #ccc; color: #333; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style="height: 18px; vertical-align: middle; margin-right: 8px;">
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Register</h2>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <label>Username</label>
+            <input type="text" name="reg_username" required>
+            <label>Email</label>
+            <input type="email" name="reg_email" required>
+            <label>Password</label>
+            <input type="password" name="reg_password" required>
+            <label>Phone Number</label>
+            <input type="text" name="reg_number" required>
+            <label>Address</label>
+            <input type="text" name="reg_address" required>
+            <button type="submit" name="register">Register</button>
+        </form>
+    </div>
 </div>
 
-<div class="form-section">
-    <h2>Register</h2>
-    <form method="POST">
-        
-        <input type="hidden" name="csrf_token"
-               value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-        <label>Username</label>
-        <input type="text" name="reg_username" required>
-        <label>Email</label>
-        <input type="email" name="reg_email" required>
-        <label>Password</label>
-        <input type="password" name="reg_password" required>
-        <label>Phone Number</label>
-        <input type="text" name="reg_number" required>
-        <label>Address</label>
-        <input type="text" name="reg_address" required>
-        <button type="submit" name="register">Register</button>
-    </form>
-</div>
-</div>
+<!-- Google OAuth (using Supabase) -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(
+    'https://fpvkzzsoudxcsbejxvow.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwdmt6enNvdWR4Y3NiZWp4dm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5ODkyNzIsImV4cCI6MjA2MjU2NTI3Mn0.aCydxiEiXHxyOyY3TTNHeuNL3vGALWKpAbnIC4Jjy7s'
+  );
+
+  window.signInWithGoogle = async function () {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://89.148.45.69/supabase_callback.php'
+      }
+    });
+    if (error) {
+      alert("Login failed: " + error.message);
+    }
+  };
+</script>
 </body>
 </html>

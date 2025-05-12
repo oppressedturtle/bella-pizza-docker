@@ -10,21 +10,26 @@ if (!isset($_SESSION["user_id"])) {
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
 $user_id = $_SESSION["user_id"];
-$stmt = $pdo->prepare("SELECT username FROM customer WHERE customer_id = ?");
+$login_type = $_SESSION["login_type"] ?? 'normal'; // fallback
+
+// Fetch username from correct table
+if ($login_type === 'google') {
+    $stmt = $pdo->prepare("SELECT username FROM google_login WHERE customer_id = ?");
+} else {
+    $stmt = $pdo->prepare("SELECT username FROM customer WHERE customer_id = ?");
+}
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
+// Fetch all orders for user
 $sql = "SELECT * FROM `order` WHERE customer_id = :customer_id ORDER BY order_date DESC";
-
 $stmt = $pdo->prepare($sql);
 $stmt->execute([':customer_id' => $user_id]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Optional: filter
 $search = $_GET['search'] ?? '';
-
 if (!empty($search)) {
     $orders = array_filter($orders, function ($order) use ($search) {
         return stripos((string)$order['order_id'], $search) !== false ||
@@ -33,6 +38,7 @@ if (!empty($search)) {
     });
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

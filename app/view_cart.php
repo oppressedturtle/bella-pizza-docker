@@ -10,13 +10,29 @@ if (!isset($_SESSION["user_id"])) {
 $host = "db";
 $dbname = "RestaurantDB";
 $username = "root";
-$password = "rootpass"; 
+$password = "rootpass";
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
+}
+
+$missingProfile = false;
+$loginType = $_SESSION['login_type'] ?? 'normal';
+$user_id = $_SESSION['user_id'];
+
+if ($loginType === 'google') {
+    $stmt = $pdo->prepare("SELECT phone, address FROM google_login WHERE customer_id = ?");
+} else {
+    $stmt = $pdo->prepare("SELECT phone, address FROM customer WHERE customer_id = ?");
+}
+$stmt->execute([$user_id]);
+$profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (empty($profile['phone']) || empty($profile['address'])) {
+    $missingProfile = true;
 }
 
 if (!isset($_SESSION['cart'])) {
@@ -65,12 +81,7 @@ if (!empty($cart)) {
             --bg: #fff8f3;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Fredoka', sans-serif;
             background: var(--bg);
@@ -86,11 +97,7 @@ if (!empty($cart)) {
             align-items: center;
         }
 
-        .navbar h1 {
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
+        .navbar h1 { font-size: 1.5rem; margin: 0; }
         .navbar .actions button {
             background: var(--accent);
             color: black;
@@ -194,6 +201,16 @@ if (!empty($cart)) {
             text-decoration: underline;
         }
 
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
         @media (max-width: 700px) {
             table, th, td {
                 font-size: 14px;
@@ -220,7 +237,7 @@ if (!empty($cart)) {
             <p style="text-align:center;">Your cart is empty.</p>
         <?php else: ?>
             <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                 <table>
                     <tr>
                         <th>Item</th>
@@ -228,7 +245,7 @@ if (!empty($cart)) {
                         <th>Quantity</th>
                         <th>Subtotal</th>
                     </tr>
-                    <?php foreach ($menu_items as $item): 
+                    <?php foreach ($menu_items as $item):
                         $menu_id = $item['menu_id'];
                         $qty = $cart[$menu_id];
                         $subtotal = $qty * $item['price'];
@@ -237,9 +254,7 @@ if (!empty($cart)) {
                         <tr>
                             <td><?= htmlspecialchars($item['item_name']) ?></td>
                             <td><?= number_format($item['price'], 2) ?> BD</td>
-                            <td>
-                                <input type="number" name="quantities[<?= $menu_id ?>]" value="<?= $qty ?>" min="0">
-                            </td>
+                            <td><input type="number" name="quantities[<?= $menu_id ?>]" value="<?= $qty ?>" min="0"></td>
                             <td><?= number_format($subtotal, 2) ?> BD</td>
                         </tr>
                     <?php endforeach; ?>
@@ -256,11 +271,19 @@ if (!empty($cart)) {
             </form>
 
             <div class="actions inline-buttons" style="margin-top: 20px;">
-                <form action="Paymentgateway.php" method="POST">
-                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                    <?php $_SESSION['cart_total_bhd'] = $total; ?>
-                    <button type="submit">💳 Proceed to Payment</button>
-                </form>
+                <?php $_SESSION['cart_total_bhd'] = $total; ?>
+                <?php if ($missingProfile): ?>
+                    <div class="message warning">
+                        ⚠️ Please complete your profile (phone number and address) before proceeding to payment.
+                        <br><br>
+                        <button type="button" onclick="window.location.href='profile.php'">Go to Profile</button>
+                    </div>
+                <?php else: ?>
+                    <form action="Paymentgateway.php" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                        <button type="submit">💳 Proceed to Payment</button>
+                    </form>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 

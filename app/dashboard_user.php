@@ -10,21 +10,17 @@ $customerId = $_SESSION["user_id"];
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
 $stmt = $pdo->prepare("INSERT INTO customer_logins (customer_id) VALUES (?)");
 $stmt->execute([$customerId]);
-
 
 $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM customer_logins WHERE customer_id = ?");
 $checkStmt->execute([$customerId]);
 $loginCount = $checkStmt->fetchColumn();
-
 $isFirstLogin = ($loginCount == 1);
 
 $stmt = $pdo->prepare("SELECT username FROM customer WHERE customer_id = ?");
 $stmt->execute([$_SESSION["user_id"]]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["add_to_cart"])) {
     validate_csrf_token();
@@ -38,7 +34,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["add_to_cart"])) {
     $_SESSION["cart"][$menu_id] = ($_SESSION["cart"][$menu_id] ?? 0) + $quantity;
     $message = "✅ Added to cart!";
 }
-
 
 $categories     = $pdo->query("SELECT * FROM category ORDER BY display_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $category_items = [];
@@ -177,32 +172,29 @@ foreach ($categories as $cat) {
             font-size: 1.5rem;
         }
         .cards {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 10px;
-    padding-left: 5px;
-    scroll-padding: 10px;
-}
-
-.card {
-    flex: 0 0 auto;
-    min-width: 230px;
-    max-width: 260px;
-    background: var(--light);
-    border-radius: 12px;
-    box-shadow: 0 6px 10px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    scroll-snap-align: start;
-    transition: transform 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-}
-
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 10px;
+            padding-left: 5px;
+            scroll-padding: 10px;
+        }
+        .card {
+            flex: 0 0 auto;
+            min-width: 230px;
+            max-width: 260px;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            scroll-snap-align: start;
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
         .card img {
             width: 100%;
             height: 160px;
@@ -279,7 +271,7 @@ foreach ($categories as $cat) {
         <nav>
             <button onclick="window.location='my_orders.php'">My Orders</button>
             <button onclick="window.location='view_cart.php'" class="cart-btn">Cart</button>
-          
+            <button onclick="window.location='profile.php'">Profile</button>
             <form method="POST" action="logout.php" class="logout-form">
                 <input type="hidden" name="csrf_token"
                        value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
@@ -311,7 +303,6 @@ foreach ($categories as $cat) {
                             </div>
                             <div class="card-actions">
                                 <form method="POST">
-                                    <!-- CSRF token for add-to-cart -->
                                     <input type="hidden" name="csrf_token"
                                            value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                                     <input type="hidden" name="menu_id" value="<?= $item['menu_id'] ?>">
