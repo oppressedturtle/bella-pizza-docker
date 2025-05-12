@@ -77,7 +77,7 @@ if (!isset($_SESSION['employee_id']) || $_SESSION['role'] !== 'delivery') {
         return;
       }
 
-      // First fix: get current location once
+      
       navigator.geolocation.getCurrentPosition(
         pos => {
           sendLocation(pos.coords.latitude, pos.coords.longitude);
