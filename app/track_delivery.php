@@ -13,7 +13,7 @@ $driver_id = isset($_GET['driver_id']) ? (int)$_GET['driver_id'] : 0;
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// ✅ Validate order ownership and assigned driver
+
 $stmt = $pdo->prepare("SELECT delivery_driver_id FROM `order` WHERE order_id = ? AND customer_id = ?");
 $stmt->execute([$order_id, $_SESSION['user_id']]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);

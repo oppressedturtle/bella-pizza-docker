@@ -99,7 +99,6 @@ function renderSections($today_orders, $past_orders, $role) {
     renderSection("📂 Past Orders", $past_orders, $role);
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['new_status'])) {
     validate_csrf_token();
     $order_id = $_POST['order_id'];
@@ -123,13 +122,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'], $_POST['n
     exit('success');
 }
 
-
 if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     renderSections($today_orders, $past_orders, $role);
     exit;
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -226,9 +223,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     .actions form {
       display: inline-block;
     }
-    .back-button {
-      text-align: right;
-      margin-bottom: 10px;
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
     .back-link {
       background-color: var(--primary);
@@ -238,6 +236,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
       border-radius: 6px;
       font-weight: bold;
     }
+    .accent-link {
+      background-color: var(--accent);
+      color: black;
+    }
     .navbar {
       background: var(--primary);
       color: white;
@@ -245,7 +247,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 1000;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
     .navbar h1 {
@@ -283,7 +284,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
 </div>
 
 <div class="container">
-  <div class="back-button">
+  <div class="nav-buttons">
+    <?php if (in_array($role, ['admin', 'cashier', 'support'])): ?>
+      <a href="add_order.php" class="back-link accent-link">➕ Add Order</a>
+    <?php endif; ?>
     <a href="dashboard.php" class="back-link">← Back to Dashboard</a>
   </div>
 
