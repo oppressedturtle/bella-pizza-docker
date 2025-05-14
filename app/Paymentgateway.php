@@ -13,7 +13,7 @@ $merchant_identifier = "pCNttJRP";
 $sha_request_phrase = "12QN0MFnhxftV7Rev1l2nY[!";
 $currency = "BHD";
 $language = "en";
-$return_url = "http://localhost:8080/response.php?session_id=" . session_id(); 
+$return_url = "https://89.148.45.69/response.php?session_id=" . session_id(); 
 
 
 $cart_total_bhd = $_SESSION['cart_total_bhd'];

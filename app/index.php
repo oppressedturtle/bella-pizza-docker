@@ -60,11 +60,25 @@ if (!isset($_COOKIE['visitor_logged'])) {
       align-items: center;
       padding: 20px;
       flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(0.4);
     }
 
     .logo {
       margin-bottom: 20px;
       max-width: 180px;
+      z-index: 2;
     }
 
     .logo img {
@@ -82,6 +96,8 @@ if (!isset($_COOKIE['visitor_logged'])) {
       width: 100%;
       text-align: center;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 2;
     }
 
     h1 {
@@ -156,6 +172,12 @@ if (!isset($_COOKIE['visitor_logged'])) {
   </style>
 </head>
 <body>
+
+<!-- Background Video -->
+<video autoplay muted loop id="bgVideo">
+  <source src="img/bg.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 <div class="logo">
   <img src="img/bella pizza logo.png" alt="Bella Pizza Logo">
