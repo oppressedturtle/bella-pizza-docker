@@ -173,7 +173,7 @@ if (!isset($_COOKIE['visitor_logged'])) {
 </head>
 <body>
 
-<!-- Background Video -->
+
 <video autoplay muted loop id="bgVideo">
   <source src="img/bg.mp4" type="video/mp4">
   Your browser does not support the video tag.
