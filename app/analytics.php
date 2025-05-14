@@ -10,9 +10,6 @@ if (!isset($_SESSION["employee_id"]) || $_SESSION["role"] !== 'admin') {
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
-
-
 $startDate = $_GET['start'] ?? date('Y-m-01');
 $endDate   = $_GET['end'] ?? date('Y-m-d');
 
@@ -20,17 +17,13 @@ $params = [':start' => $startDate, ':end' => $endDate];
 $condition = "WHERE DATE(order_date) BETWEEN :start AND :end";
 $nonCancelledCondition = $condition . " AND status != 'cancelled'";
 
-
-
 $totalOrders = $pdo->prepare("SELECT COUNT(*) FROM `order` $condition");
 $totalOrders->execute($params);
 $totalOrders = $totalOrders->fetchColumn();
 
-
 $totalRevenue = $pdo->prepare("SELECT SUM(total_amount) FROM `order` $nonCancelledCondition");
 $totalRevenue->execute($params);
 $totalRevenue = $totalRevenue->fetchColumn() ?: 0;
-
 
 $orderStatuses = $pdo->prepare("
   SELECT status, COUNT(*) AS c, SUM(total_amount) AS total
@@ -40,7 +33,6 @@ $orderStatuses = $pdo->prepare("
 ");
 $orderStatuses->execute($params);
 $orderStatuses = $orderStatuses->fetchAll(PDO::FETCH_ASSOC);
-
 
 $allItems = $pdo->prepare("
   SELECT m.item_name, SUM(oi.quantity) AS total_sold, SUM(oi.quantity * m.price) AS total_amount
@@ -53,7 +45,6 @@ $allItems = $pdo->prepare("
 ");
 $allItems->execute($params);
 $allItems = $allItems->fetchAll(PDO::FETCH_ASSOC);
-
 
 $dailyRevenue = $pdo->prepare("
   SELECT DATE(order_date) AS day, SUM(total_amount) AS revenue
@@ -69,12 +60,10 @@ foreach ($dailyRevenue as $row) {
   $dailyValues[] = round($row['revenue'], 2);
 }
 
-
 $statusLabels = array_column($orderStatuses, 'status');
 $statusCounts = array_column($orderStatuses, 'c');
 $itemLabels   = array_column($allItems, 'item_name');
 $itemCounts   = array_column($allItems, 'total_sold');
-
 
 $loginQuery = $pdo->prepare("
   SELECT COUNT(*) FROM customer_logins
@@ -82,7 +71,6 @@ $loginQuery = $pdo->prepare("
 ");
 $loginQuery->execute($params);
 $totalCustomerLogins = $loginQuery->fetchColumn();
-
 
 $newCustomersQuery = $pdo->prepare("
   SELECT COUNT(*) FROM (
@@ -94,7 +82,6 @@ $newCustomersQuery = $pdo->prepare("
 ");
 $newCustomersQuery->execute($params);
 $newCustomers = $newCustomersQuery->fetchColumn();
-
 
 $returningCustomersQuery = $pdo->prepare("
   SELECT COUNT(DISTINCT current.customer_id) FROM customer_logins current
@@ -108,7 +95,57 @@ $returningCustomersQuery = $pdo->prepare("
 $returningCustomersQuery->execute($params);
 $returningCustomers = $returningCustomersQuery->fetchColumn();
 
+// ✅ NEW: Visitors Data
+$visitsQuery = $pdo->prepare("
+  SELECT COUNT(*) FROM visitors
+  WHERE DATE(visit_time) BETWEEN :start AND :end
+");
+$visitsQuery->execute($params);
+$totalVisits = $visitsQuery->fetchColumn() ?: 0;
+
+$uniqueVisitsQuery = $pdo->prepare("
+  SELECT COUNT(DISTINCT ip_address) FROM visitors
+  WHERE DATE(visit_time) BETWEEN :start AND :end
+");
+$uniqueVisitsQuery->execute($params);
+$totalUniqueVisits = $uniqueVisitsQuery->fetchColumn() ?: 0;
+
+$csvRows = [
+  ['Bella Pizza Analytics Report'],
+  ['Date Range:', "$startDate to $endDate"],
+  ['Generated At:', date("Y-m-d H:i:s")],
+  [],
+  ['Total Orders', $totalOrders],
+  ['Total Revenue', number_format($totalRevenue, 2) . ' BD'],
+  ['Total Visits', $totalVisits],
+  ['Total Unique Visits', $totalUniqueVisits],
+  ['Total Customer Logins', $totalCustomerLogins],
+  ['New Customers', $newCustomers],
+  ['Returning Customers', $returningCustomers],
+  [],
+  ['Status', 'Count', 'Total Amount']
+];
+
+foreach ($orderStatuses as $s) {
+  $csvRows[] = [
+    $s['status'],
+    $s['c'],
+    number_format($s['total'], 2) . ' BD'
+  ];
+}
+
+$csvRows[] = [];
+$csvRows[] = ['Item Name', 'Total Sold', 'Total Amount'];
+
+foreach ($allItems as $i) {
+  $csvRows[] = [
+    $i['item_name'],
+    $i['total_sold'],
+    number_format($i['total_amount'], 2) . ' BD'
+  ];
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
