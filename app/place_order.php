@@ -50,18 +50,23 @@ foreach ($cart as $menu_id => $qty) {
     ];
 }
 
-$stmt = $pdo->prepare("INSERT INTO `order` (customer_id, status, total_amount) VALUES (?, 'Pending', ?)");
-$stmt->execute([$_SESSION["user_id"], $total]);
+// ✅ Get login type from session (default to 'normal')
+$login_type = $_SESSION["login_type"] ?? 'normal';
+
+// ✅ Insert order with login_type
+$stmt = $pdo->prepare("INSERT INTO `order` (customer_id, status, total_amount, login_type) VALUES (?, 'Pending', ?, ?)");
+$stmt->execute([$_SESSION["user_id"], $total, $login_type]);
 $order_id = $pdo->lastInsertId();
 
+// Insert order items
 $stmt = $pdo->prepare("INSERT INTO order_items (order_id, menu_id, quantity, subtotal) VALUES (?, ?, ?, ?)");
 foreach ($order_items as $item) {
     $stmt->execute([$order_id, $item['menu_id'], $item['quantity'], $item['subtotal']]);
 }
 
+// Clear cart
 unset($_SESSION["cart"]);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

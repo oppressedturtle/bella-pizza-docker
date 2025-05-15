@@ -9,12 +9,12 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $customerId = $_SESSION["user_id"];
-$loginType = $_SESSION["login_type"] ?? 'normal'; // default to normal
+$loginType = $_SESSION["login_type"] ?? 'normal'; 
 
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Log login depending on user type
+
 if ($loginType === 'normal') {
     $stmt = $pdo->prepare("INSERT INTO customer_logins (customer_id) VALUES (?)");
     $stmt->execute([$customerId]);
@@ -24,7 +24,7 @@ if ($loginType === 'normal') {
     $loginCount = $checkStmt->fetchColumn();
     $isFirstLogin = ($loginCount == 1);
 
-    // Fetch username from customer table
+
     $stmt = $pdo->prepare("SELECT username FROM customer WHERE customer_id = ?");
     $stmt->execute([$customerId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,12 +32,12 @@ if ($loginType === 'normal') {
     $stmt = $pdo->prepare("INSERT INTO google_logins (google_customer_id) VALUES (?)");
     $stmt->execute([$customerId]);
 
-    // Fetch username from google_login table
+    
     $stmt = $pdo->prepare("SELECT username FROM google_login WHERE customer_id = ?");
     $stmt->execute([$customerId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 } else {
-    // Unknown login type
+    
     die("Unauthorized access.");
 }
 
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["add_to_cart"])) {
     $message = "✅ Added to cart!";
 }
 
-// Load categories and items
+
 $categories     = $pdo->query("SELECT * FROM category ORDER BY display_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $category_items = [];
 $itemStmt       = $pdo->prepare("SELECT * FROM menu WHERE availability=1 AND category_id=? ORDER BY item_name");

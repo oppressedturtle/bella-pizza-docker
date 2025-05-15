@@ -23,9 +23,13 @@ $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Fetch all orders for user
-$sql = "SELECT * FROM `order` WHERE customer_id = :customer_id ORDER BY order_date DESC";
+$sql = "SELECT * FROM `order` WHERE customer_id = :customer_id AND login_type = :login_type ORDER BY order_date DESC";
 $stmt = $pdo->prepare($sql);
-$stmt->execute([':customer_id' => $user_id]);
+$stmt->execute([
+    ':customer_id' => $user_id,
+    ':login_type' => $login_type
+]);
+
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Optional: filter
