@@ -25,12 +25,27 @@ $role = $_SESSION['role'];
 $today = date('Y-m-d');
 
 function fetchOrders($pdo, $employee_id, $role) {
+    $filter = ($role === 'delivery') ? 'WHERE o.delivery_driver_id = :employee_id' : '';
+
+    $sql = "
+        SELECT o.*, 
+               IF(o.login_type = 'google', g.username, c.username) AS customer_name,
+               CONCAT(e.first_name, ' ', e.last_name) AS driver_name
+        FROM `order` o
+        LEFT JOIN customer c ON o.login_type = 'normal' AND o.customer_id = c.customer_id
+        LEFT JOIN google_login g ON o.login_type = 'google' AND o.customer_id = g.customer_id
+        LEFT JOIN employee e ON o.delivery_driver_id = e.employee_id
+        $filter
+        ORDER BY o.order_date DESC
+    ";
+
     if ($role === 'delivery') {
-        $stmt = $pdo->prepare("SELECT o.*, c.username AS customer_name, CONCAT(e.first_name, ' ', e.last_name) AS driver_name FROM `order` o LEFT JOIN customer c ON o.customer_id = c.customer_id LEFT JOIN employee e ON o.delivery_driver_id = e.employee_id WHERE o.delivery_driver_id = :employee_id ORDER BY o.order_date DESC");
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([':employee_id' => $employee_id]);
     } else {
-        $stmt = $pdo->query("SELECT o.*, c.username AS customer_name, CONCAT(e.first_name, ' ', e.last_name) AS driver_name FROM `order` o LEFT JOIN customer c ON o.customer_id = c.customer_id LEFT JOIN employee e ON o.delivery_driver_id = e.employee_id ORDER BY o.order_date DESC");
+        $stmt = $pdo->query($sql);
     }
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

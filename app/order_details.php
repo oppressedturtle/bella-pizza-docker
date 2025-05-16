@@ -18,13 +18,8 @@ if (!isset($_GET['order_id'])) {
 
 $order_id = $_GET['order_id'];
 
-
-$order_stmt = $pdo->prepare("
-    SELECT o.*, c.username AS customer_name, c.email, c.phone, c.address
-    FROM `order` o
-    LEFT JOIN customer c ON o.customer_id = c.customer_id
-    WHERE o.order_id = ?
-");
+// First, get the order with login_type and customer_id
+$order_stmt = $pdo->prepare("SELECT * FROM `order` WHERE order_id = ?");
 $order_stmt->execute([$order_id]);
 $order = $order_stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -32,6 +27,20 @@ if (!$order) {
     die("Order not found.");
 }
 
+// Now fetch customer details based on login_type
+$customer = null;
+
+if ($order['login_type'] === 'google') {
+    $cust_stmt = $pdo->prepare("SELECT username AS customer_name, email, phone, address FROM google_login WHERE customer_id = ?");
+} else {
+    $cust_stmt = $pdo->prepare("SELECT username AS customer_name, email, phone, address FROM customer WHERE customer_id = ?");
+}
+
+$cust_stmt->execute([$order['customer_id']]);
+$customer = $cust_stmt->fetch(PDO::FETCH_ASSOC);
+
+// Merge into order for display convenience
+$order = array_merge($order, $customer ?: []);
 
 $items_stmt = $pdo->prepare("
     SELECT oi.*, m.item_name, m.price
@@ -142,9 +151,9 @@ $order_items = $items_stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="section">
             <h3>🧾 Order Info</h3>
-            <p><strong>Status:</strong> <?= $order['status'] ?></p>
-            <p><strong>Total Amount:</strong> <?= $order['total_amount'] ?> BD</p>
-            <p><strong>Order Date:</strong> <?= $order['order_date'] ?></p>
+            <p><strong>Status:</strong> <?= htmlspecialchars($order['status']) ?></p>
+            <p><strong>Total Amount:</strong> <?= htmlspecialchars($order['total_amount']) ?> BD</p>
+            <p><strong>Order Date:</strong> <?= htmlspecialchars($order['order_date']) ?></p>
         </div>
 
         <div class="section">
@@ -168,9 +177,9 @@ $order_items = $items_stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach ($order_items as $item): ?>
                         <tr>
                             <td><?= htmlspecialchars($item['item_name']) ?></td>
-                            <td><?= $item['price'] ?> BD</td>
-                            <td><?= $item['quantity'] ?></td>
-                            <td><?= $item['subtotal'] ?> BD</td>
+                            <td><?= number_format($item['price'], 2) ?> BD</td>
+                            <td><?= htmlspecialchars($item['quantity']) ?></td>
+                            <td><?= number_format($item['subtotal'], 2) ?> BD</td>
                         </tr>
                     <?php endforeach; ?>
                 </table>

@@ -219,7 +219,7 @@ if (!empty($search)) {
             cursor: pointer;
             display: block;
             width: 100%;
-            margin-bottom: 8px; /* ✅ add this */
+            margin-bottom: 8px; 
 }
 
 

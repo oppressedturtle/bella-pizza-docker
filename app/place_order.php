@@ -50,10 +50,10 @@ foreach ($cart as $menu_id => $qty) {
     ];
 }
 
-// ✅ Get login type from session (default to 'normal')
+
 $login_type = $_SESSION["login_type"] ?? 'normal';
 
-// ✅ Insert order with login_type
+
 $stmt = $pdo->prepare("INSERT INTO `order` (customer_id, status, total_amount, login_type) VALUES (?, 'Pending', ?, ?)");
 $stmt->execute([$_SESSION["user_id"], $total, $login_type]);
 $order_id = $pdo->lastInsertId();
