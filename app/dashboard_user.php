@@ -41,7 +41,7 @@ if ($loginType === 'normal') {
     die("Unauthorized access.");
 }
 
-// Add to cart logic
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["add_to_cart"])) {
     validate_csrf_token();
 

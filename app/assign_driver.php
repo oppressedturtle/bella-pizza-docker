@@ -56,12 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['driver_id'])) {
     }
 }
 
-// Get available delivery drivers
+
 $drivers = $pdo
     ->query("SELECT employee_id, first_name, last_name FROM employee WHERE role = 'delivery'")
     ->fetchAll(PDO::FETCH_ASSOC);
 
-// Get order info
+
 $stmt = $pdo->prepare("
     SELECT o.*, c.username AS customer_name
     FROM `order` o

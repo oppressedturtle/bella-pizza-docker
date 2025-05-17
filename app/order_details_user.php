@@ -18,7 +18,7 @@ $order_id = $_GET['order_id'];
 $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Fetch the order first
+
 $stmt = $pdo->prepare("SELECT * FROM `order` WHERE order_id = ?");
 $stmt->execute([$order_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,12 +27,12 @@ if (!$order) {
     die("Order not found.");
 }
 
-// Validate that the order belongs to this user by checking login_type and customer_id match
+
 if ($order['customer_id'] != $user_id || $order['login_type'] !== $login_type) {
     die("Access denied.");
 }
 
-// Fetch items
+
 $stmt = $pdo->prepare("SELECT oi.quantity, m.item_name, m.price 
                        FROM order_items oi 
                        JOIN menu m ON oi.menu_id = m.menu_id 

@@ -243,7 +243,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
     </div>
 </div>
 
-<!-- Google OAuth (using Supabase) -->
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 

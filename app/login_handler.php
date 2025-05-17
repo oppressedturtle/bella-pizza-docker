@@ -10,7 +10,7 @@ $name  = $data['user_metadata']['full_name'] ?? 'Google User';
 $conn = new mysqli("db", "root", "rootpass", "RestaurantDB");
 if ($conn->connect_error) die("Connection failed");
 
-// Check if email exists
+
 $stmt = $conn->prepare("SELECT * FROM google_login WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -22,7 +22,7 @@ if ($user = $result->fetch_assoc()) {
     $_SESSION['email'] = $user['email'];
     $_SESSION['login_type'] = 'google';
 } else {
-    // Ensure unique username
+ 
     $original_name = $name;
     $check = $conn->prepare("SELECT 1 FROM google_login WHERE username = ?");
     $check->bind_param("s", $name);
@@ -37,7 +37,7 @@ if ($user = $result->fetch_assoc()) {
         $check->store_result();
     }
 
-    // Insert new user
+   
     $stmt = $conn->prepare("INSERT INTO google_login (username, email) VALUES (?, ?)");
     $stmt->bind_param("ss", $name, $email);
     if ($stmt->execute()) {

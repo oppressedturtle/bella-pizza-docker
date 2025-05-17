@@ -95,7 +95,7 @@ $returningCustomersQuery = $pdo->prepare("
 $returningCustomersQuery->execute($params);
 $returningCustomers = $returningCustomersQuery->fetchColumn();
 
-// ✅ NEW: Visitors Data
+
 $visitsQuery = $pdo->prepare("
   SELECT COUNT(*) FROM visitors
   WHERE DATE(visit_time) BETWEEN :start AND :end

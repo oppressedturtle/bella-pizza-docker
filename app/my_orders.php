@@ -11,9 +11,9 @@ $pdo = new PDO("mysql:host=db;dbname=RestaurantDB", "root", "rootpass");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $user_id = $_SESSION["user_id"];
-$login_type = $_SESSION["login_type"] ?? 'normal'; // fallback
+$login_type = $_SESSION["login_type"] ?? 'normal'; 
 
-// Fetch username from correct table
+
 if ($login_type === 'google') {
     $stmt = $pdo->prepare("SELECT username FROM google_login WHERE customer_id = ?");
 } else {
@@ -22,7 +22,7 @@ if ($login_type === 'google') {
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch all orders for user
+
 $sql = "SELECT * FROM `order` WHERE customer_id = :customer_id AND login_type = :login_type ORDER BY order_date DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([
@@ -32,7 +32,7 @@ $stmt->execute([
 
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Optional: filter
+
 $search = $_GET['search'] ?? '';
 if (!empty($search)) {
     $orders = array_filter($orders, function ($order) use ($search) {

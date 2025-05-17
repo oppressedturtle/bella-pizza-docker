@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "log_helper.php"; // make sure this is available and correct
+require_once "log_helper.php"; 
 
 $host = "db";
 $dbname = "RestaurantDB";

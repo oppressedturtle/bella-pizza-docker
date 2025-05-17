@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $update = $pdo->prepare("UPDATE category SET name = ? WHERE category_id = ?");
         $update->execute([$name, $category_id]);
 
-        // Log the update
+       
         log_action("Update Category", "Category ID $category_id renamed to '$name'", "INFO", $_SESSION["employee_id"], null, $_SESSION["username"]);
 
         $message = "Category updated!";

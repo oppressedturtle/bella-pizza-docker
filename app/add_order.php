@@ -14,7 +14,7 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-// Grouped items by category
+
 $customers = $pdo->query("SELECT customer_id, username FROM customer ORDER BY username")->fetchAll(PDO::FETCH_ASSOC);
 $categories = $pdo->query("SELECT category_id, name FROM category ORDER BY display_order ASC, name ASC")->fetchAll(PDO::FETCH_ASSOC);
 

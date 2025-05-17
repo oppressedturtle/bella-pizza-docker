@@ -58,13 +58,13 @@ $stmt = $pdo->prepare("INSERT INTO `order` (customer_id, status, total_amount, l
 $stmt->execute([$_SESSION["user_id"], $total, $login_type]);
 $order_id = $pdo->lastInsertId();
 
-// Insert order items
+
 $stmt = $pdo->prepare("INSERT INTO order_items (order_id, menu_id, quantity, subtotal) VALUES (?, ?, ?, ?)");
 foreach ($order_items as $item) {
     $stmt->execute([$order_id, $item['menu_id'], $item['quantity'], $item['subtotal']]);
 }
 
-// Clear cart
+
 unset($_SESSION["cart"]);
 ?>
 

@@ -18,7 +18,7 @@ if (!isset($_GET['order_id'])) {
 
 $order_id = $_GET['order_id'];
 
-// First, get the order with login_type and customer_id
+
 $order_stmt = $pdo->prepare("SELECT * FROM `order` WHERE order_id = ?");
 $order_stmt->execute([$order_id]);
 $order = $order_stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,7 +27,7 @@ if (!$order) {
     die("Order not found.");
 }
 
-// Now fetch customer details based on login_type
+
 $customer = null;
 
 if ($order['login_type'] === 'google') {
@@ -39,7 +39,7 @@ if ($order['login_type'] === 'google') {
 $cust_stmt->execute([$order['customer_id']]);
 $customer = $cust_stmt->fetch(PDO::FETCH_ASSOC);
 
-// Merge into order for display convenience
+
 $order = array_merge($order, $customer ?: []);
 
 $items_stmt = $pdo->prepare("

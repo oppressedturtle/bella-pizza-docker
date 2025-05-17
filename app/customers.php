@@ -11,14 +11,14 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-// Handle customer deletion
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $stmt = $pdo->prepare("DELETE FROM customer WHERE customer_id = ?");
     $stmt->execute([$_POST['delete_id']]);
     $message = "Customer deleted successfully.";
 }
 
-// Fetch all customers
+
 $customers = $pdo->query("SELECT * FROM customer ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -52,12 +52,12 @@ $customers = $pdo->query("SELECT * FROM customer ORDER BY created_at DESC")->fet
             <td><?= htmlspecialchars($customer['address']) ?></td>
             <td><?= $customer['created_at'] ?></td>
             <td>
-                <!-- Edit button -->
+               
                 <a href="edit_customer.php?customer_id=<?= $customer['customer_id'] ?>">
                     <button>Edit</button>
                 </a>
 
-                <!-- Delete button -->
+                
                 <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
                     <input type="hidden" name="delete_id" value="<?= $customer['customer_id'] ?>">
                     <button type="submit">Delete</button>
