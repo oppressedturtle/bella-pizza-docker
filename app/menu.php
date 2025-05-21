@@ -176,7 +176,7 @@ while ($row = $menu_result->fetch_assoc()) {
 <header class="header">
   <div class="logo">Bella <span>Pizza</span> </div>
   <nav>
-    <a href="index.php" class="home-btn">← Home</a>
+    <a href="index.php" class="home-btn"> Home</a>
   </nav>
 </header>
 

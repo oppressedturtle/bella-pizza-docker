@@ -304,7 +304,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </form>
 
   <div class="back-link">
-    <a href="edit_menu_items.php">← Back to Menu</a>
+    <a href="edit_menu_items.php"> Back to Menu</a>
   </div>
 </div>
 

@@ -200,7 +200,7 @@ if (!$order) {
   <header class="header">
     <div class="logo">Bella Pizza 🍕</div>
     <nav>
-      <button onclick="location.href='orders.php'">← Back to Orders</button>
+      <button onclick="location.href='orders.php'"> Back to Orders</button>
     </nav>
   </header>
 
@@ -235,7 +235,7 @@ if (!$order) {
         <div class="actions">
           <button type="submit">Assign Driver</button>
           <div class="back-link">
-            <a href="orders.php">← Cancel</a>
+            <a href="orders.php"> Cancel</a>
           </div>
         </div>
       </form>

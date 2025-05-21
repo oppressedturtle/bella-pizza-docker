@@ -288,7 +288,7 @@ if (!empty($cart)) {
         <?php endif; ?>
 
         <div class="links">
-            <a href="dashboard_user.php">← Back to Menu</a>
+            <a href="dashboard_user.php"> Back to Menu</a>
         </div>
     </div>
 </body>

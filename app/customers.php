@@ -72,6 +72,6 @@ $customers = $pdo->query("SELECT * FROM customer ORDER BY created_at DESC")->fet
         <button type="submit">Add customer</button>
     </form>
     <br>
-    <a href="dashboard.php">← Back to Dashboard</a>
+    <a href="dashboard.php"> Back to Dashboard</a>
 </body>
 </html>

@@ -303,7 +303,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <?php if (in_array($role, ['admin', 'cashier', 'support'])): ?>
       <a href="add_order.php" class="back-link accent-link">➕ Add Order</a>
     <?php endif; ?>
-    <a href="dashboard.php" class="back-link">← Back to Dashboard</a>
+    <a href="dashboard.php" class="back-link"> Back to Dashboard</a>
   </div>
 
   <h2>Manage Orders</h2>

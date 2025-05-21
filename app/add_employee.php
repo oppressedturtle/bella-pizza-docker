@@ -275,7 +275,7 @@ if (isset($_GET['check'])) {
   </form>
 
   <div class="back-link">
-    <a href="employees.php">← Back to Employee List</a>
+    <a href="employees.php"> Back to Employee List</a>
   </div>
 </div>
 

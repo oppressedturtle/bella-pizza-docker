@@ -189,7 +189,7 @@ $order_items = $items_stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <div class="back-link">
-            <a href="orders.php">← Back to Orders</a>
+            <a href="orders.php"> Back to Orders</a>
         </div>
     </div>
 </body>

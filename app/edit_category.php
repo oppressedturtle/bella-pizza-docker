@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </form>
 
         <div class="back-link">
-            <a href="categories.php">← Back to Categories</a>
+            <a href="categories.php"> Back to Categories</a>
         </div>
     </div>
 </body>

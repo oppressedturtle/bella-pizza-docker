@@ -138,7 +138,7 @@ $categories = $pdo
   <header class="header">
     <div class="logo">Bella Pizza 🍕</div>
     <nav>
-      <button onclick="location.href='dashboard.php'">← Dashboard</button>
+      <button onclick="location.href='dashboard.php'"> Dashboard</button>
     </nav>
   </header>
 
@@ -152,7 +152,7 @@ $categories = $pdo
 
       <div class="top-actions">
         <a href="add_category.php">➕ Add Category</a>
-        <a href="dashboard.php">← Back to Dashboard</a>
+        <a href="dashboard.php"> Back to Dashboard</a>
       </div>
 
       <table>

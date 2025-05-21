@@ -128,7 +128,7 @@ unset($_SESSION["cart"]);
         <h2>🎉 Order Placed Successfully!</h2>
         <p>Your order <strong>#<?= $order_id ?></strong> has been submitted. Thank you for ordering with Bella Pizza!</p>
         <p class="total">Total Paid: <?= number_format($total, 3) ?> BD</p>
-        <a href="dashboard_user.php">← Back to Homepage</a>
+        <a href="dashboard_user.php"> Back to Homepage</a>
     </div>
 </body>
 </html>

@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit">Place Order</button>
         </form>
 
-        <a class="back-link" href="dashboard.php">← Back to Dashboard</a>
+        <a class="back-link" href="dashboard.php"> Back to Dashboard</a>
     </div>
 </body>
 </html>

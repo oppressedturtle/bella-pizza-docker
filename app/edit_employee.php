@@ -272,7 +272,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </form>
 
   <div class="back-link">
-    <a href="employees.php">← Back to Employees</a>
+    <a href="employees.php"> Back to Employees</a>
   </div>
 </div>
 

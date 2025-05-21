@@ -90,6 +90,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["update_customer"])) {
     </form>
 
     <br>
-    <a href="customers.php">← Back to Customer List</a>
+    <a href="customers.php"> Back to Customer List</a>
 </body>
 </html>
