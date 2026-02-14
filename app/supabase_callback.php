@@ -26,7 +26,7 @@ require_once 'includes/session_config.php';
 
     const supabase = createClient(
       'https://fpvkzzsoudxcsbejxvow.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwdmt6enNvdWR4Y3NiZWp4dm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5ODkyNzIsImV4cCI6MjA2MjU2NTI3Mn0.aCydxiEiXHxyOyY3TTNHeuNL3vGALWKpAbnIC4Jjy7s'
+      'FAKE'
     );
 
     const { data: { user }, error } = await supabase.auth.getUser();
