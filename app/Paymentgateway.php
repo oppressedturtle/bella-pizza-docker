@@ -8,9 +8,9 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['cart'])) {
 }
 
 
-$access_code = "IFafg4g3ZkDD5SigYlpl";
-$merchant_identifier = "pCNttJRP";
-$sha_request_phrase = "12QN0MFnhxftV7Rev1l2nY[!";
+$access_code = "FAKE";
+$merchant_identifier = "FAKE";
+$sha_request_phrase = "FAKE";
 $currency = "BHD";
 $language = "en";
 $return_url = "https://89.148.45.69/response.php?session_id=" . session_id(); 
@@ -65,3 +65,4 @@ $signature = hash("sha256", $signature_string);
     </script>
 </body>
 </html>
+
