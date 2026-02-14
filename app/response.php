@@ -6,7 +6,7 @@ if (isset($_GET['session_id'])) {
 require_once 'includes/session_config.php';
 require_once 'includes/csrf.php';
 
-$sha_response_phrase = 'FAKE#?';
+$sha_response_phrase = 'FAKE';
 $response_params = $_POST;
 
 if (empty($response_params)) {
@@ -110,4 +110,5 @@ if ($payment_success && isset($_SESSION['email'])) {
 
 </body>
 </html>
+
 
