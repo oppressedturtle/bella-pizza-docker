@@ -13,7 +13,7 @@ try {
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
     $mail->Username   = 'noreplybellapizza@gmail.com';
-    $mail->Password   = 'ajcpxiyrrbkhqwlp'; 
+    $mail->Password   = 'FAKE'; 
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
 
@@ -42,3 +42,4 @@ try {
 } catch (Exception $e) {
     echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
 }
+
