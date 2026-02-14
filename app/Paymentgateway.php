@@ -13,7 +13,7 @@ $merchant_identifier = "FAKE";
 $sha_request_phrase = "FAKE";
 $currency = "BHD";
 $language = "en";
-$return_url = "https://89.148.45.69/response.php?session_id=" . session_id(); 
+$return_url = "https://FAKE/response.php?session_id=" . session_id(); 
 
 
 $cart_total_bhd = $_SESSION['cart_total_bhd'];
@@ -65,4 +65,5 @@ $signature = hash("sha256", $signature_string);
     </script>
 </body>
 </html>
+
 
