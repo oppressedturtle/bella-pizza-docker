@@ -18,7 +18,7 @@ $systemPrompt = ($role === 'admin')
     : "You are Bella Pizza's chatbot. greet users and give them a single recommendation based on what they menu item they tell you, and asnwer them if they inquire about the price, your answers should be very short.";
 
 
-$apiKey = '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';
+$apiKey = 'FAKE';
 
 
 $ch = curl_init("https://openrouter.ai/api/v1/chat/completions");
